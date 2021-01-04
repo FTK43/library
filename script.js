@@ -1,9 +1,5 @@
 let myLibrary = [];
 
-//for tests of display
-addBookToLibrary(new Book('Bible', 'Jews', '9000',false));
-addBookToLibrary(new Book('Quran', 'Arabs','8500',false));
-
 //constructor of the Book object
 function Book(title, author, pages, read) {
     this.title = title;
@@ -17,6 +13,7 @@ function Book(title, author, pages, read) {
 
 function addBookToLibrary(input) {
   myLibrary.push(input);
+  saveLocal();
 }
 
 //Write a function that loops through the array and displays each book on the page
@@ -39,18 +36,13 @@ function loopThroughALibrary(){
     
     //parent element of the table    
     var showLibrary = document.createElement("table");
-    
-    //caption for a table (library)
-    var caption = document.createElement("caption");
-    caption.innerHTML = "Library";
-
-    showLibrary.appendChild(caption);
 
     const tableHeader = document.createElement("tr");
     const headerTitle = document.createElement("th");
     const headerAuthor = document.createElement("th");
     const headerPages = document.createElement("th");
     const headerRead = document.createElement("th");
+    tableHeader.className = "header";
 
     headerTitle.innerHTML = "Title";
     headerAuthor.innerHTML = "Author";
@@ -74,12 +66,17 @@ function loopThroughALibrary(){
         //create a row
         const bookRow = document.createElement("tr");
         bookRow.id = i;
+        bookRow.className = "tableRow";
         //fill a row
         //create each cell
         const bookTitle = document.createElement("th");
         const bookAuthor = document.createElement("th");
         const bookPages = document.createElement("th");
         const bookRead = document.createElement("th");
+
+        const multiButton = document.createElement("div");
+        multiButton.className = "multi-button";
+
         const removeButton = document.createElement("button");
         const changeStatus = document.createElement("button");
         //fill each cell with values
@@ -93,8 +90,12 @@ function loopThroughALibrary(){
         }
         removeButton.innerHTML = "Remove From Library";
         removeButton.id = i;
+        removeButton.className = "buttonTable";
+
         changeStatus.innerHTML = "Change Status";
         changeStatus.id = i;
+        changeStatus.className = "buttonTable";
+        multiButton.id = "tableButtons";
 
         removeButton.addEventListener('click', removeFromLibrary);
         changeStatus.addEventListener('click', statusButton);
@@ -103,11 +104,15 @@ function loopThroughALibrary(){
         bookRow.appendChild(bookAuthor);
         bookRow.appendChild(bookPages);
         bookRow.appendChild(bookRead);
-        bookRow.appendChild(removeButton);
-        bookRow.appendChild(changeStatus);
+
+        multiButton.appendChild(removeButton);
+        multiButton.appendChild(changeStatus);
 
         //append row to table
         showLibrary.appendChild(bookRow);
+        //append buttons to table
+        showLibrary.appendChild(multiButton);
+        
         //append table to body
         document.body.append(showLibrary);
         i++;
@@ -139,7 +144,7 @@ function removeFromLibrary(e){
     myLibrary = myLibrary.filter(function(book) {
         return myLibrary.indexOf(book) != parseInt(e.target.id);
     });
-
+    saveLocal();
     loopThroughALibrary();
 }
 
@@ -149,16 +154,56 @@ function statusButton(e){
        myLibrary[e.target.id].read = false;
     } else {
        myLibrary[e.target.id].read = true;
-    } 
+    }
+    saveLocal();
     loopThroughALibrary();
 }
 
+function inputValidation(){
+    
+    var i = 0;
+    var title = document.getElementById('title');
+    var author = document.getElementById('author');
+    var pages = document.getElementById('pages');
+
+    //check title
+    if(title.value === ""){
+        alert("Please enter a valid title");
+        i++;
+    }
+
+    //check author
+    if(author.value === ""){
+        alert("Please enter a valid author");
+        i++;
+    }
+
+    //check number of pages
+    if(isNaN(parseInt(pages.value)) || !isFinite(pages.value)){
+        alert("Please enter a valid number of pages");
+        i++;
+    }
+
+    return i===0;
+}
+
 function closeForm(){
+
+    //input validation
+    if(!inputValidation()){
+        console.log("LOH");
+        return;
+    }
+
+    //show multi-button
+    var multiButton = document.querySelector("div");
+    multiButton.style.cssText = null;
+
     //unblock the 'addBook' button
     var element =  document.getElementById('blocked');
     if(typeof(element) !='undefined' && element !=null){
         document.getElementById('blocked').id = 'addBook';
-    }   
+    }
     
     //get values from the form and push them into the array 
     const inputValues = Array.from(document.querySelectorAll("input"));
@@ -177,6 +222,10 @@ function closeForm(){
 }
 
 function openForm(){
+    //hide multi-button
+    var multiButton = document.querySelector("div");
+    multiButton.style.cssText = "display:none";
+
     //block the addBook button from getting clicked while form is opened
     var inputOpen = document.querySelector("inputForm");
     if(typeof(inputOpen) !='undefined' && inputOpen != null){
@@ -200,7 +249,6 @@ function openForm(){
 
     const inputForm = document.createElement("inputForm");
     inputForm.innerHTML = formHTML;
-    inputForm.style.cssText = formCSS;
     document.body.append(inputForm);
 
     const submitBook = document.getElementById('submitBook');
@@ -208,23 +256,17 @@ function openForm(){
     
 }
 
-var formHTML = "<form name=\"book\">\n<p><b><i>Title of the book</i></b><br>\n" +
-               "<input type=\"text\" size=\"40\"><br>" +
-               "<b><i>Author of the book</i></b><br>\n" +
-			   "<input type=\"text\" size=\"40\"><br>\n" +
-			   "<b><i>Number of pages</i></b><br>\n" +
-			   "<input type=\"text\" size=\"20\"><br>\n" +
-			   "<b><i>Have you read this book?</i></b><br>\n" +
-			   "<input type=\"checkbox\">\n" +
+var formHTML = "<form name=\"book\">\n<p><text>Title of the book</text><br>\n" +
+               "<input class=\"input\" type=\"text\" id=\"title\" size=\"40\"><br>" +
+               "<text>Author of the book</text><br>\n" +
+			   "<input class=\"input\" type=\"text\" id=\"author\" size=\"40\"><br>\n" +
+			   "<text>Number of pages</text><br>\n" +
+			   "<input class=\"input\" type=\"text\" id=\"pages\" size=\"20\"><br>\n" +
+			   "<text>Have you read this book?</text>\n" +
+			   "<input class=\"input\" type=\"checkbox\"><br>\n" +
+               "<button id=\"submitBook\" type=\"button\" class=\"submit\">submit Book</button>"+
                "</p>\n"+
-               "<button id=\"submitBook\" type=\"button\">submit Book</button>"+
                "</form>"
-var formCSS =   "position: fixed;" +
-                "top: 50%;" +
-                "left: 50%;" +
-                "transform: translate(-50%, -50%);" +
-                "padding: 3px;" +
-                "border: 4px solid black;"           
                
 const form = document.getElementById('addBook');
 form.addEventListener('click', openForm);
@@ -234,3 +276,18 @@ showAllBooks.addEventListener('click', loopThroughALibrary);
 
 const hideLibrary = document.getElementById('hideLibrary');
 hideLibrary.addEventListener('click', hideTheGallery);
+
+
+//local storage
+//save
+function saveLocal() {
+    localStorage.setItem("myLibrary", JSON.stringify(myLibrary));
+}
+//restore
+function restoreLocal() {
+    myLibrary = JSON.parse(localStorage.getItem("myLibrary"));
+    if (myLibrary === null) myLibrary = [];
+    loopThroughALibrary();
+}
+
+restoreLocal();
