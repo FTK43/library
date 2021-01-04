@@ -245,7 +245,6 @@ function openForm(){
     if(typeof(table) !='undefined' && table != null){
         table.style.display = "none";
     }
-    //document.querySelector('table').style.display = "none";
 
     const inputForm = document.createElement("inputForm");
     inputForm.innerHTML = formHTML;
@@ -287,7 +286,7 @@ function saveLocal() {
 function restoreLocal() {
     myLibrary = JSON.parse(localStorage.getItem("myLibrary"));
     if (myLibrary === null) myLibrary = [];
-    loopThroughALibrary();
+    //loopThroughALibrary();
 }
 
 restoreLocal();
